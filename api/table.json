@@ -1,0 +1,127 @@
+{
+  "code": 0,
+  "msg": "",
+  "count": 1000,
+  "data": [
+   {
+   "ID": 10001,
+   "xingming": "李四",
+   "xuehao": "2413000042",
+   "sex": "女",
+   "dianhua": "13588889999",
+   "shengfen": "110105199803124567",
+   "banji": 23425323,
+   "zhuanye": "数据科学与大数据技术",
+   "louhao": "5 号楼",
+   "sushehao": 308
+   },
+   {
+   "ID": 10002,
+   "xingming": "王五",
+   "xuehao": "2413000043",
+   "sex": "男",
+   "dianhua": "13877776666",
+   "shengfen": "310101200005237890",
+   "banji": 23425324,
+   "zhuanye": "人工智能",
+   "louhao": "3 号楼",
+   "sushehao": 216
+   },
+   {
+   "ID": 10003,
+   "xingming": "赵六",
+   "xuehao": "2413000044",
+   "sex": "女",
+   "dianhua": "13955554444",
+   "shengfen": "440106199907152345",
+   "banji": 23425325,
+   "zhuanye": "计算机科学与技术",
+   "louhao": "6 号楼",
+   "sushehao": 412
+   },
+   {
+   "ID": 10004,
+   "xingming": "孙七",
+   "xuehao": "2413000045",
+   "sex": "男",
+   "dianhua": "13699998888",
+   "shengfen": "210203199810085678",
+   "banji": 23425326,
+   "zhuanye": "网络工程",
+   "louhao": "4 号楼",
+   "sushehao": 109
+   },
+   {
+   "ID": 10005,
+   "xingming": "周八",
+   "xuehao": "2413000046",
+   "sex": "女",
+   "dianhua": "13722223333",
+   "shengfen": "510104200002148901",
+   "banji": 23425327,
+   "zhuanye": "数字媒体技术",
+   "louhao": "5 号楼",
+   "sushehao": 309
+   },
+   {
+   "ID": 10006,
+   "xingming": "吴九",
+   "xuehao": "2413000047",
+   "sex": "男",
+   "dianhua": "13411112222",
+   "shengfen": "610102199909301234",
+   "banji": 23425328,
+   "zhuanye": "信息安全",
+   "louhao": "3 号楼",
+   "sushehao": 217
+   },
+   {
+   "ID": 10007,
+   "xingming": "郑十",
+   "xuehao": "2413000048",
+   "sex": "女",
+   "dianhua": "15933334444",
+   "shengfen": "330106199804185678",
+   "banji": 23425329,
+   "zhuanye": "软件工程（嵌入式方向）",
+   "louhao": "6 号楼",
+   "sushehao": 413
+   },
+   {
+   "ID": 10008,
+   "xingming": "钱十一",
+   "xuehao": "2413000049",
+   "sex": "男",
+   "dianhua": "15844445555",
+   "shengfen": "320105199906258901",
+   "banji": 23425330,
+   "zhuanye": "物联网工程",
+   "louhao": "4 号楼",
+   "sushehao": 110
+   },
+   {
+   "ID": 10009,
+   "xingming": "冯十二",
+   "xuehao": "2413000050",
+   "sex": "女",
+   "dianhua": "15766667777",
+   "shengfen": "420103200008112345",
+   "banji": 23425331,
+   "zhuanye": "智能科学与技术",
+   "louhao": "5 号楼",
+   "sushehao": 310
+   },
+   {
+   "ID": 10010,
+   "xingming": "陈十三",
+   "xuehao": "2413000051",
+   "sex": "男",
+   "dianhua": "15688889999",
+   "shengfen": "430102199812055678",
+   "banji": 23425332,
+   "zhuanye": "计算机应用技术",
+   "louhao": "3 号楼",
+   "sushehao": 218
+   }
+  ]
+}

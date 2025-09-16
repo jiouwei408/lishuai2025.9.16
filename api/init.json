@@ -1,0 +1,126 @@
+{
+  "homeInfo": {
+    "title": "首页登录",
+    "href": "page/welcome-1.html?t=1"
+  },
+  "logoInfo": {
+    "title": "宿舍管理系统",
+    "image": "css/images/logo2.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "常规管理",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "主页",
+          "href": "page/welcome-1.html",
+          "icon": "fa fa-tachometer",
+          "target": "_self"
+        },
+        {
+          "title": "宿舍分配管理",
+          "href": "",
+          "icon": "fa fa-window-maximize",
+          "target": "_self",
+		  "child":[
+			  {
+			    "title": "自主分配",
+			    "href": "page/form.html",
+			    "icon": "fa fa-list-alt",
+			    "target": "_self"
+			  },
+			  {
+			    "title": "随机分配",
+			    "href": "page/suiji.html",
+			    "icon": "fa fa-list-alt",
+			    "target": "_self"
+			  },
+			  {
+			    "title": "退宿处理",
+			    "href": "page/555.html",
+			    "icon": "fa fa-list-alt",
+			    "target": "_self"
+			  }
+		  ]
+        },
+        {
+          "title": "访客登记管理",
+          "href": "page/setting.html",
+          "icon": "fa fa-gears",
+          "target": "_self"
+        },
+        {
+          "title": "信息管理",
+          "href": "",
+          "icon": "fa fa-file-text",
+          "target": "_self",
+		  "child": [
+		    {
+		      "title": "学生信息",
+		      "href": "page/table.html",
+		      "icon": "fa fa-list-alt",
+		      "target": "_self"
+		    },
+			{
+			    "title": "宿管信息",
+		    	"href": "page/suguan.html",
+				"icon": "fa fa-list-alt",
+				"target": "_self"
+			}
+		  ]
+        },
+        {
+          "title": "宿舍报修管理",
+          "href": "",
+          "icon": "fa fa-calendar",
+          "target": "_self",
+          "child": [
+            {
+              "title": "数据统计",
+              "href": "page/menu.html",
+              "icon": "fa fa-list-alt",
+              "target": "_self"
+            },
+            {
+              "title": "报修反馈",
+              "href": "page/form-step.html",
+              "icon": "fa fa-navicon",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "违规与安全管理",
+          "href": "",
+          "icon": "fa fa-flag-o",
+          "target": "_self",
+          "child": [
+            {
+              "title": "安全管理",
+              "href": "page/anquan.html",
+              "icon": "fa fa-stumbleupon-circle",
+              "target": "_self"
+            },
+            {
+              "title": "违规记录",
+              "href": "page/anquan2.html",
+              "icon": "fa fa-viacoin",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "消息通知",
+          "href": "page/404.html",
+          "icon": "fa fa-home",
+          "target": "_self"
+        }
+
+      ]
+    }
+  ]
+}
