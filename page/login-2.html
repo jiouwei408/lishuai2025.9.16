@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能随机宿舍分配系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局样式重置与基础设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            backdrop-filter: blur(4px);
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px;
+        }
+
+        /* 标题样式 */
+        .page-title {
+            text-align: center;
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #818cf8);
+            border-radius: 2px;
+        }
+
+        /* 分配模式选择 */
+        .allocation-mode {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .mode-title {
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .mode-option:hover {
+            background-color: #e2e8f0;
+        }
+
+        .mode-option input {
+            accent-color: #4f46e5;
+        }
+
+        .mode-hint {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 10px;
+            padding-left: 24px;
+            font-style: italic;
+        }
+
+        /* 输入区域样式 */
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .input-section {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .form-group {
+            width: 100%;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+            background-color: #ffffff;
+        }
+
+        .student-textarea {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .dorm-size-input {
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* 按钮样式 */
+        .allocate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .allocate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+            background: linear-gradient(90deg, #4338ca, #7c3aed);
+        }
+
+        .allocate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 结果区域样式 */
+        .result-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px dashed #e2e8f0;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .result-stats {
+            display: flex;
+            gap: 10px;
+        }
+
+        .result-stat {
+            color: #64748b;
+            font-size: 14px;
+            background-color: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 宿舍卡片样式 */
+        .dorms-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .dorms-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dorms-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .dorm-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border-top: 4px solid #4f46e5;
+        }
+
+        .dorm-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .dorm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .dorm-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dorm-number::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4f46e5;
+        }
+
+        .dorm-classes {
+            font-size: 13px;
+            color: #64748b;
+            background-color: #e0e7ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .dorm-members {
+            list-style: none;
+        }
+
+        .dorm-member {
+            padding: 8px 0;
+            color: #4a5568;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dorm-member:last-child {
+            border-bottom: none;
+        }
+
+        .dorm-member::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #818cf8;
+        }
+
+        .member-class {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-left: auto;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background-color: #f1f5f9;
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: none;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(79, 70, 229, 0.2);
+            border-radius: 50%;
+            border-top-color: #4f46e5;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 提示消息 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translate(-50%, 100px);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #10b981;
+        }
+
+        .toast.error {
+            background-color: #ef4444;
+        }
+
+        .toast.info {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">智能随机宿舍分配系统</h1>
+        
+        <!-- 分配模式选择 -->
+        <div class="allocation-mode">
+            <div class="mode-title">
+                <i class="fas fa-sort"></i>分配模式
+            </div>
+            <div class="mode-options">
+                <label class="mode-option">
+                    <input type="radio" name="allocationMode" value="random" checked>
+                    <span>完全随机分配</span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="allocationMode" value="classFirst">
+                    <span>按班级优先分配</span>
+                </label>
+            </div>
+            <div class="mode-hint" id="modeHint">
+                完全随机：所有学生随机分配到宿舍
+            </div>
+        </div>
+        
+        <!-- 输入区域 -->
+        <div class="input-section">
+            <div class="form-group">
+                <label class="form-label" for="studentList">
+                    <i class="fas fa-users"></i>学生名单
+                </label>
+                <textarea 
+                    id="studentList" 
+                    class="form-control student-textarea" 
+                    placeholder="请输入学生姓名，每行1人。
+如果使用按班级优先分配，请使用格式：姓名-班级
+例如：
+张三-一班
+李四-一班
+王五-二班
+赵六-三班
+钱七-二班
+孙八-三班
+周九-一班
+吴十-二班"
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="dormSize">
+                    <i class="fas fa-bed"></i>每间宿舍人数
+                </label>
+                <input 
+                    type="number" 
+                    id="dormSize" 
+                    class="form-control dorm-size-input" 
+                    min="2" 
+                    value="4" 
+                    placeholder="请输入2及以上的数字"
+                >
+            </div>
+        </div>
+
+        <button id="allocateBtn" class="allocate-btn">
+            <i class="fas fa-random"></i>
+            <span>开始分配宿舍</span>
+        </button>
+
+        <!-- 加载动画 -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- 结果展示区域 -->
+        <div class="result-section" id="resultSection">
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon"><i class="fas fa-building"></i></div>
+                <h3>暂无分配结果</h3>
+                <p>输入学生名单并点击分配按钮，即可生成宿舍列表</p>
+            </div>
+
+            <div id="resultContainer" style="display: none;">
+                <div class="result-header">
+                    <h2 class="result-title">宿舍分配结果</h2>
+                    <div class="result-stats">
+                        <span class="result-stat" id="dormCount"><i class="fas fa-building"></i> 0间宿舍</span>
+                        <span class="result-stat" id="studentCount"><i class="fas fa-user"></i> 0名学生</span>
+                    </div>
+                </div>
+                <div class="dorms-container" id="dormsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示消息元素 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // JavaScript 代码实现核心功能
+        
+        // 获取DOM元素
+        const studentListEl = document.getElementById('studentList');
+        const dormSizeEl = document.getElementById('dormSize');
+        const allocateBtn = document.getElementById('allocateBtn');
+        const loadingEl = document.getElementById('loading');
+        const emptyStateEl = document.getElementById('emptyState');
+        const resultContainerEl = document.getElementById('resultContainer');
+        const dormCountEl = document.getElementById('dormCount');
+        const studentCountEl = document.getElementById('studentCount');
+        const dormsContainerEl = document.getElementById('dormsContainer');
+        const toastEl = document.getElementById('toast');
+        const modeOptions = document.querySelectorAll('input[name="allocationMode"]');
+        const modeHintEl = document.getElementById('modeHint');
+
+        // 模式提示文本
+        const modeHints = {
+            random: "完全随机：所有学生随机分配到宿舍",
+            classFirst: "按班级优先：优先将同班级学生分配到同一宿舍，剩余学生随机分配（需按格式输入：姓名-班级）"
+        };
+
+        // 监听模式变化
+        modeOptions.forEach(option => {
+            option.addEventListener('change', () => {
+                if (option.checked) {
+                    modeHintEl.textContent = modeHints[option.value];
+                }
+            });
+        });
+
+        // 分配按钮点击事件
+        allocateBtn.addEventListener('click', () => {
+            // 获取分配模式
+            const allocationMode = document.querySelector('input[name="allocationMode"]:checked').value;
+            
+            // 获取并处理输入数据
+            const studentText = studentListEl.value.trim();
+            const dormSize = parseInt(dormSizeEl.value);
+
+            // 验证输入
+            if (!studentText) {
+                showToast('请输入学生名单！', 'error');
+                return;
+            }
+            if (isNaN(dormSize) || dormSize < 2) {
+                showToast('请输入2及以上的宿舍人数！', 'error');
+                return;
+            }
+
+            // 处理学生名单（去重、过滤空行）
+            let students = studentText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line); // 过滤空字符串
+            students = [...new Set(students)]; // 去重
+
+            if (students.length < 2) {
+                showToast('至少需要2名学生才能分配宿舍！', 'error');
+                return;
+            }
+
+            // 按班级优先模式时，验证格式
+            if (allocationMode === 'classFirst') {
+                const invalidStudents = students.filter(student => !student.includes('-'));
+                if (invalidStudents.length > 0) {
+                    showToast(`发现${invalidStudents.length}名学生格式不正确，请使用"姓名-班级"格式！`, 'error');
+                    return;
+                }
+            }
+
+            // 显示加载动画
+            showLoading(true);
+            
+            // 模拟处理延迟，提升用户体验
+            setTimeout(() => {
+                let dorms = [];
+                
+                // 根据选择的模式进行分配
+                if (allocationMode === 'classFirst') {
+                    // 按班级优先分配
+                    dorms = allocateByClassFirst(students, dormSize);
+                } else {
+                    // 完全随机分配
+                    dorms = allocateRandomly(students, dormSize);
+                }
+
+                // 渲染结果
+                renderResult(dorms, students.length, allocationMode);
+                
+                // 隐藏加载动画
+                showLoading(false);
+                
+                // 显示成功提示
+                showToast('宿舍分配完成！', 'success');
+            }, 800);
+        });
+
+        // 1. 按班级优先分配算法
+        function allocateByClassFirst(students, dormSize) {
+            // 解析学生信息，分离姓名和班级
+            const studentsWithClass = students.map(student => {
+                const [name, className] = student.split('-', 2);
+                return {
+                    name: name.trim(),
+                    className: className.trim()
+                };
+            });
+
+            // 按班级分组
+            const classGroups = {};
+            studentsWithClass.forEach(student => {
+                if (!classGroups[student.className]) {
+                    classGroups[student.className] = [];
+                }
+                classGroups[student.className].push(student);
+            });
+
+            // 为每个班级随机排序学生
+            Object.keys(classGroups).forEach(className => {
+                classGroups[className] = fisherYatesShuffle(classGroups[className]);
+            });
+
+            // 创建宿舍数组
+            const dorms = [];
+            let remainingStudents = [];
+
+            // 先为每个班级分配宿舍
+            Object.keys(classGroups).forEach(className => {
+                const studentsInClass = classGroups[className];
+                
+                // 计算该班级能完整分配的宿舍数量
+                const fullDormsCount = Math.floor(studentsInClass.length / dormSize);
+                
+                // 分配完整宿舍
+                for (let i = 0; i < fullDormsCount; i++) {
+                    const startIndex = i * dormSize;
+                    const endIndex = startIndex + dormSize;
+                    const dormStudents = studentsInClass.slice(startIndex, endIndex);
+                    
+                    dorms.push({
+                        students: dormStudents,
+                        classes: [className]
+                    });
+                }
+                
+                // 收集剩余学生
+                const remainingCount = studentsInClass.length % dormSize;
+                if (remainingCount > 0) {
+                    const startIndex = fullDormsCount * dormSize;
+                    remainingStudents = remainingStudents.concat(
+                        studentsInClass.slice(startIndex)
+                    );
+                }
+            });
+
+            // 随机打乱剩余学生
+            remainingStudents = fisherYatesShuffle(remainingStudents);
+            
+            // 分配剩余学生
+            for (let i = 0; i < remainingStudents.length; i += dormSize) {
+                const dormStudents = remainingStudents.slice(i, i + dormSize);
+                
+                // 收集这个宿舍包含的所有班级
+                const classesInDorm = [...new Set(dormStudents.map(s => s.className))];
+                
+                dorms.push({
+                    students: dormStudents,
+                    classes: classesInDorm
+                });
+            }
+
+            // 最后再随机打乱所有宿舍的顺序
+            return fisherYatesShuffle(dorms);
+        }
+
+        // 2. 完全随机分配算法
+        function allocateRandomly(students, dormSize) {
+            // 解析学生信息
+            const parsedStudents = students.map(student => {
+                if (student.includes('-')) {
+                    const [name, className] = student.split('-', 2);
+                    return {
+                        name: name.trim(),
+                        className: className.trim()
+                    };
+                } else {
+                    return {
+                        name: student.trim(),
+                        className: '未指定'
+                    };
+                }
+            });
+
+            // 随机打乱学生顺序
+            const shuffledStudents = fisherYatesShuffle(parsedStudents);
+            
+            // 分组分配到宿舍
+            const dorms = [];
+            for (let i = 0; i < shuffledStudents.length; i += dormSize) {
+                const dormStudents = shuffledStudents.slice(i, i + dormSize);
+                
+                // 收集这个宿舍包含的所有班级
+                const classesInDorm = [...new Set(dormStudents.map(s => s.className))];
+                
+                dorms.push({
+                    students: dormStudents,
+                    classes: classesInDorm
+                });
+            }
+            
+            return dorms;
+        }
+
+        // 公平的洗牌算法（Fisher-Yates 洗牌算法）
+        function fisherYatesShuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                // 交换元素
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 渲染分配结果
+        function renderResult(dorms, totalStudents, allocationMode) {
+            // 显示结果容器，隐藏空状态
+            emptyStateEl.style.display = 'none';
+            resultContainerEl.style.display = 'block';
+
+            // 更新统计信息
+            dormCountEl.innerHTML = `<i class="fas fa-building"></i> ${dorms.length}间宿舍`;
+            studentCountEl.innerHTML = `<i class="fas fa-user"></i> ${totalStudents}名学生`;
+
+            // 清空之前的结果
+            dormsContainerEl.innerHTML = '';
+
+            // 遍历每个宿舍，生成卡片
+            dorms.forEach((dorm, index) => {
+                const dormCard = document.createElement('div');
+                dormCard.className = 'dorm-card';
+                
+                // 生成班级信息文本
+                const classesText = dorm.classes.length > 3 
+                    ? `${dorm.classes.slice(0, 3).join(', ')} 等${dorm.classes.length}个班级`
+                    : dorm.classes.join(', ');
+                
+                // 生成宿舍成员列表HTML
+                const membersHtml = dorm.students.map(student => `
+                    <li class="dorm-member">
+                        ${student.name}
+                        <span class="member-class">${student.className}</span>
+                    </li>
+                `).join('');
+                
+                dormCard.innerHTML = `
+                    <div class="dorm-header">
+                        <h3 class="dorm-number">宿舍 ${index + 1}</h3>
+                        <span class="dorm-classes">${classesText}</span>
+                    </div>
+                    <ul class="dorm-members">
+                        ${membersHtml}
+                    </ul>
+                `;
+                
+                // 添加卡片到容器（带动画效果）
+                dormCard.style.opacity = '0';
+                dormCard.style.transform = 'translateY(20px)';
+                dormsContainerEl.appendChild(dormCard);
+                
+                // 触发动画
+                setTimeout(() => {
+                    dormCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    dormCard.style.opacity = '1';
+                    dormCard.style.transform = 'translateY(0)';
+                }, index * 50); // 错开动画时间，提升视觉效果
+            });
+        }
+
+        // 显示/隐藏加载动画
+        function showLoading(show) {
+            loadingEl.style.display = show ? 'flex' : 'none';
+            allocateBtn.disabled = show;
+            allocateBtn.style.opacity = show ? '0.7' : '1';
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'info') {
+            // 设置提示内容和类型
+            toastEl.textContent = message;
+            toastEl.className = 'toast';
+            toastEl.classList.add(type);
+            
+            // 显示提示
+            toastEl.classList.add('show');
+            
+            // 3秒后隐藏提示
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

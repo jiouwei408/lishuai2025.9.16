@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>访客管理系统</title>
+  <!-- 外部资源引入 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = { 
+      theme: { 
+        extend: { 
+          colors: {
+            primary: '#165DFF', 
+            success: '#52C41A', 
+            warning: '#FAAD14',
+            danger: '#FF4D4F',
+            neutral: '#86909C'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .transition-smooth {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-inter text-gray-800">
+  <!-- 顶部导航 -->
+  <header class="bg-white card-shadow sticky top-0 z-50 transition-smooth">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <i class="fa fa-building-o text-primary text-2xl"></i>
+        <h1 class="text-xl font-bold text-primary">访客管理系统</h1>
+      </div>
+      <!-- 用户信息区域 -->
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-gray-600 hidden md:inline-block">
+          <i class="fa fa-clock-o mr-1"></i>
+          <span id="currentTime"></span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="container mx-auto px-4 py-6">
+    <!-- 1. 统计卡片区域 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl p-4 card-shadow hover:shadow-md transition-smooth border-l-4 border-primary">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-gray-500 mb-1">今日访客</p>
+            <h3 class="text-2xl font-bold">24</h3>
+           <!-- <p class="text-xs text-success mt-1">
+              <i class="fa fa-arrow-up mr-1"></i>12% 较昨日
+            </p> -->
+          </div>
+          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <i class="fa fa-user-o"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 card-shadow hover:shadow-md transition-smooth border-l-4 border-success">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-gray-500 mb-1">当前在场</p>
+            <h3 class="text-2xl font-bold" id="currentVisitors">8</h3>
+            <!-- <p class="text-xs text-neutral mt-1">
+              <i class="fa fa-minus mr-1"></i>2 较1小时前
+            </p> -->
+          </div>
+          <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+            <i class="fa fa-users"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 card-shadow hover:shadow-md transition-smooth border-l-4 border-warning">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-gray-500 mb-1">本月累计</p>
+            <h3 class="text-2xl font-bold">586</h3>
+            <!-- <p class="text-xs text-success mt-1">
+              <i class="fa fa-arrow-up mr-1"></i>8% 较上月
+            </p> -->
+          </div>
+          <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+            <i class="fa fa-calendar"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 card-shadow hover:shadow-md transition-smooth border-l-4 border-danger">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-gray-500 mb-1">预约访客</p>
+            <h3 class="text-2xl font-bold">12</h3>
+           <!-- <p class="text-xs text-success mt-1">
+              <i class="fa fa-arrow-up mr-1"></i>5 今日新增
+            </p> -->
+          </div>
+          <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+            <i class="fa fa-calendar-check-o"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 图表统计区域 -->
+    <div class="bg-white rounded-xl p-4 card-shadow mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-base font-bold flex items-center">
+          <i class="fa fa-line-chart text-primary mr-2"></i>访客趋势统计
+        </h2>
+        <div class="flex gap-2">
+          <select id="chartTimeRange" class="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary">
+            <option value="week">近7天</option>
+            <option value="month">近30天</option>
+            <option value="quarter">近90天</option>
+          </select>
+        </div>
+      </div>
+      <div id="visitorChart" class="w-full h-64"></div>
+    </div>
+
+    <!-- 3. 表单和列表区域 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- 3.1 登记表单 -->
+      <div class="bg-white rounded-xl p-5 card-shadow">
+        <h2 class="text-base font-bold mb-4 flex items-center">
+          <i class="fa fa-user-plus text-primary mr-2"></i>访客登记
+        </h2>
+        <form id="visitorForm" class="space-y-4">
+          <div>
+            <label class="block text-xs text-gray-700 mb-1">姓名 <span class="text-red-500">*</span></label>
+            <input type="text" name="name" required 
+                  class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth"
+                  placeholder="请输入访客姓名">
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-700 mb-1">证件类型</label>
+            <select name="idType" 
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth">
+              <option>身份证</option>
+              <option>护照</option>
+              <option>港澳通行证</option>
+              <option>台湾通行证</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-700 mb-1">证件号码 <span class="text-red-500">*</span></label>
+            <input type="text" name="idNumber" required 
+                  class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth"
+                  placeholder="请输入证件号码">
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-700 mb-1">手机号码 <span class="text-red-500">*</span></label>
+            <input type="tel" name="phone" required 
+                  class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth"
+                  placeholder="请输入手机号码"
+                  maxlength="11">
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-700 mb-1">被访人</label>
+            <input type="text" name="host" 
+                  class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth"
+                  placeholder="请输入被访人姓名">
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-700 mb-1">来访事由</label>
+            <select name="purpose" 
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth">
+              <option>业务洽谈</option>
+              <option>面试</option>
+              <option>探亲访友</option>
+              <option>其他</option>
+            </select>
+          </div>
+
+          <button type="submit" 
+                  class="w-full bg-primary text-white py-2.5 text-sm rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-smooth flex items-center justify-center">
+            <i class="fa fa-check mr-2"></i>确认登记
+          </button>
+        </form>
+      </div>
+
+      <!-- 3.2 访客列表 -->
+      <div class="bg-white rounded-xl p-5 card-shadow lg:col-span-2">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+          <h2 class="text-base font-bold flex items-center">
+            <i class="fa fa-list text-primary mr-2"></i>访客列表
+          </h2>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <button id="exportVisitors" 
+                    class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center transition-smooth">
+              <i class="fa fa-download mr-1.5 text-neutral"></i>导出记录
+            </button>
+            <button id="refreshList" 
+                    class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center transition-smooth">
+              <i class="fa fa-refresh mr-1.5 text-neutral"></i>刷新
+            </button>
+          </div>
+        </div>
+
+        <!-- 搜索和筛选区域 -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+          <div class="relative flex-1">
+            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" id="search" placeholder="搜索姓名/证件号/被访人" 
+                  class="w-full pl-10 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth">
+          </div>
+          <select id="filter" 
+                  class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-smooth w-full sm:w-auto">
+            <option value="all">全部访客</option>
+            <option value="in">当前在场</option>
+            <option value="out">已离开</option>
+          </select>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="overflow-x-auto text-sm rounded-lg border border-gray-100">
+          <table class="min-w-full divide-y divide-gray-100">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">证件类型</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">登记时间</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">被访人</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+              </tr>
+            </thead>
+            <tbody id="visitorList" class="bg-white divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="hidden py-12 flex flex-col items-center justify-center text-gray-400">
+          <i class="fa fa-folder-open-o text-4xl mb-3"></i>
+          <p class="text-sm">暂无访客记录</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 1. 离开确认弹窗 -->
+  <div id="modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 backdrop-blur-sm">
+    <div id="modalContent" class="bg-white rounded-xl p-5 max-w-xs w-full transform transition-all duration-300 scale-95 opacity-0">
+      <div class="text-center mb-4">
+        <div class="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center text-warning mx-auto mb-3">
+          <i class="fa fa-sign-out text-2xl"></i>
+        </div>
+        <h3 class="font-bold text-lg">确认离开登记</h3>
+        <p class="text-sm text-gray-500 mt-1">确定要登记 <span id="modalName" class="font-medium text-primary"></span> 离开吗？</p>
+      </div>
+      <div class="flex gap-3">
+        <button id="modalCancel" 
+                class="flex-1 border border-gray-200 py-2 text-sm rounded-lg hover:bg-gray-50 transition-smooth">
+          取消
+        </button>
+        <button id="modalConfirm" 
+                class="flex-1 bg-primary text-white py-2 text-sm rounded-lg hover:bg-primary/90 transition-smooth">
+          确认登记
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 操作提示 -->
+  <div id="toast" class="fixed top-4 right-4 bg-success text-white px-4 py-2 rounded shadow-lg transform translate-x-full transition-transform duration-300 text-sm flex items-center">
+    <i class="fa fa-check-circle mr-1"></i>
+    <span id="toastMessage"></span>
+  </div>
+
+  <script>
+    // 访客数据 - 确保有初始数据
+    let visitors = [
+      {id:1, name:"张三", idType:"身份证", idNumber:"110101********1234", phone:"138****5678", 
+       host:"李四", checkinTime:"09:15", status:"in"},
+      {id:2, name:"李四", idType:"身份证", idNumber:"310101********5678", phone:"139****8765", 
+       host:"王五", checkinTime:"10:30", status:"in"},
+      {id:3, name:"王五", idType:"护照", idNumber:"E12345678", phone:"137****1234", 
+       host:"赵六", checkinTime:"11:05", status:"out"},
+      {id:4, name:"赵六", idType:"身份证", idNumber:"440101********4321", phone:"136****8901", 
+       host:"孙七", checkinTime:"13:20", status:"in"},
+      {id:5, name:"孙七", idType:"港澳通行证", idNumber:"H12345678", phone:"135****2345", 
+       host:"周八", checkinTime:"14:10", status:"out"}
+    ];
+
+    // 当前操作ID
+    let currentId = null;
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 渲染访客列表
+      renderList();
+      // 更新当前时间
+      updateCurrentTime();
+      setInterval(updateCurrentTime, 60000);
+      // 初始化图表
+      initChart();
+      
+      // 事件监听
+      document.getElementById('visitorForm').addEventListener('submit', addVisitor);
+      document.getElementById('search').addEventListener('input', filterList);
+      document.getElementById('filter').addEventListener('change', filterList);
+      document.getElementById('modalCancel').addEventListener('click', closeModal);
+      document.getElementById('modalConfirm').addEventListener('click', confirmLeave);
+      document.getElementById('exportVisitors').addEventListener('click', exportVisitors);
+      document.getElementById('refreshList').addEventListener('click', () => {
+        renderList();
+        showToast('列表已刷新');
+      });
+    });
+
+    // 渲染列表
+    function renderList(data = null) {
+      const list = data || visitors;
+      const tbody = document.getElementById('visitorList');
+      const emptyState = document.getElementById('emptyState');
+      
+      // 显示或隐藏空状态
+      if (list.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        tbody.innerHTML = list.map(v => `
+          <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3">${v.name}</td>
+            <td class="px-4 py-3">${v.idType}</td>
+            <td class="px-4 py-3">${v.checkinTime}</td>
+            <td class="px-4 py-3">${v.host || '-'}</td>
+            <td class="px-4 py-3">
+              <span class="px-1.5 py-0.5 rounded text-xs ${v.status === 'in' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
+                ${v.status === 'in' ? '在场' : '已离开'}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              ${v.status === 'in' ? `<button onclick="showLeaveModal(${v.id}, '${v.name}')" class="text-warning text-xs hover:text-warning/80 transition-colors">
+                <i class="fa fa-sign-out"></i> 离开
+              </button>` : ''}
+            </td>
+          </tr>
+        `).join('');
+      }
+      
+      // 更新在场人数
+      document.getElementById('currentVisitors').textContent = visitors.filter(v => v.status === 'in').length;
+    }
+
+    // 添加访客
+    function addVisitor(e) {
+      e.preventDefault();
+      const form = e.target;
+      const now = new Date();
+      const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      
+      visitors.unshift({
+        id: Date.now(),
+        name: form.name.value,
+        idType: form.idType.value,
+        idNumber: form.idNumber.value,
+        phone: form.phone.value,
+        host: form.host.value,
+        checkinTime: time,
+        status: 'in'
+      });
+      
+      renderList();
+      form.reset();
+      showToast('访客登记成功');
+    }
+
+    // 筛选列表
+    function filterList() {
+      const search = document.getElementById('search').value.toLowerCase();
+      const filter = document.getElementById('filter').value;
+      
+      let result = visitors;
+      
+      // 搜索筛选
+      if (search) {
+        result = result.filter(v => 
+          v.name.toLowerCase().includes(search) || 
+          v.idNumber.includes(search) ||
+          (v.host && v.host.toLowerCase().includes(search))
+        );
+      }
+      
+      // 状态筛选
+      if (filter !== 'all') {
+        result = result.filter(v => v.status === filter);
+      }
+      
+      renderList(result);
+    }
+
+    // 显示离开弹窗
+    function showLeaveModal(id, name) {
+      currentId = id;
+      document.getElementById('modalName').textContent = name;
+      const modal = document.getElementById('modal');
+      modal.classList.remove('hidden');
+      // 显示动画
+      setTimeout(() => {
+        document.getElementById('modalContent').classList.remove('scale-95', 'opacity-0');
+        document.getElementById('modalContent').classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    // 关闭弹窗
+    function closeModal() {
+      const modalContent = document.getElementById('modalContent');
+      modalContent.classList.remove('scale-100', 'opacity-100');
+      modalContent.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        document.getElementById('modal').classList.add('hidden');
+        currentId = null;
+      }, 300);
+    }
+
+    // 确认离开
+    function confirmLeave() {
+      const index = visitors.findIndex(v => v.id === currentId);
+      if (index !== -1) {
+        visitors[index].status = 'out';
+        // 记录离开时间
+        const now = new Date();
+        visitors[index].checkoutTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        renderList();
+        showToast('已登记离开');
+      }
+      closeModal();
+    }
+
+    // 显示提示消息
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = message;
+      toast.classList.remove('translate-x-full');
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+      }, 2000);
+    }
+
+    // 更新当前时间
+    function updateCurrentTime() {
+      const now = new Date();
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+      document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN', options);
+    }
+
+    // 初始化图表
+    function initChart() {
+      const chartDom = document.getElementById('visitorChart');
+      const myChart = echarts.init(chartDom);
+      
+      // 图表数据
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            name: '访客数量',
+            type: 'bar',
+            data: [12, 19, 15, 24, 18, 28, 24],
+            itemStyle: {
+              color: '#165DFF'
+            }
+          }
+        ]
+      };
+      
+      myChart.setOption(option);
+      
+      // 响应窗口大小变化
+      window.addEventListener('resize', () => {
+        myChart.resize();
+      });
+      
+      // 时间范围切换
+      document.getElementById('chartTimeRange').addEventListener('change', function() {
+        const value = this.value;
+        let xAxisData, seriesData;
+        
+        switch(value) {
+          case 'week':
+            xAxisData = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            seriesData = [12, 19, 15, 24, 18, 28, 24];
+            break;
+          case 'month':
+            xAxisData = ['第1周', '第2周', '第3周', '第4周'];
+            seriesData = [65, 82, 78, 92];
+            break;
+          case 'quarter':
+            xAxisData = ['1月', '2月', '3月'];
+            seriesData = [280, 320, 350];
+            break;
+        }
+        
+        myChart.setOption({
+          xAxis: {
+            data: xAxisData
+          },
+          series: [{
+            data: seriesData
+          }]
+        });
+      });
+    }
+
+    // 导出访客记录
+    function exportVisitors() {
+      // 简单模拟导出功能
+      showToast('访客记录导出成功');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宿舍安全统计分析</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script>
+    tailwind.config = { theme: { extend: { 
+      colors: { primary: '#3B82F6', success: '#10B981', warning: '#F59E0B', danger: '#EF4444' }
+    }}}
+  </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <!-- 页面标题 -->
+  <header class="bg-white shadow-sm py-4">
+    <div class="container mx-auto px-4">
+      <h1 class="text-xl font-bold text-primary flex items-center">
+        <i class="fa fa-bar-chart mr-2"></i>宿舍安全统计分析
+      </h1>
+    </div>
+  </header>
+
+  <!-- 筛选区域 -->
+  <div class="bg-white border-b border-gray-200 py-3">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-wrap gap-3">
+        <select id="timeRange" class="text-sm border border-gray-200 rounded px-3 py-1.5">
+          <option value="month">近一个月</option>
+          <option value="quarter" selected>近三个月</option>
+          <option value="halfyear">近半年</option>
+          <option value="year">近一年</option>
+        </select>
+        <select id="buildingFilter" class="text-sm border border-gray-200 rounded px-3 py-1.5">
+          <option value="all">全部楼宇</option>
+          <option value="1">1号楼</option>
+          <option value="2">2号楼</option>
+          <option value="3">3号楼</option>
+          <option value="4">4号楼</option>
+        </select>
+        <button id="refreshBtn" class="text-sm bg-primary/10 text-primary px-3 py-1.5 rounded hover:bg-primary/20 flex items-center">
+          <i class="fa fa-refresh mr-1"></i>刷新数据
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-5">
+    <!-- 关键指标卡片 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <p class="text-xs text-gray-500">总违规次数</p>
+        <h3 class="text-xl font-bold mt-1">56</h3>
+        <p class="text-xs text-success mt-1 flex items-center">
+          <i class="fa fa-arrow-down mr-1"></i>较上月下降12%
+        </p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <p class="text-xs text-gray-500">安全检查次数</p>
+        <h3 class="text-xl font-bold mt-1">18</h3>
+        <p class="text-xs text-success mt-1 flex items-center">
+          <i class="fa fa-arrow-up mr-1"></i>较上月上升8%
+        </p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <p class="text-xs text-gray-500">隐患整改率</p>
+        <h3 class="text-xl font-bold mt-1">92%</h3>
+        <p class="text-xs text-success mt-1 flex items-center">
+          <i class="fa fa-arrow-up mr-1"></i>较上月上升3%
+        </p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <p class="text-xs text-gray-500">严重违规数</p>
+        <h3 class="text-xl font-bold mt-1">7</h3>
+        <p class="text-xs text-danger mt-1 flex items-center">
+          <i class="fa fa-arrow-up mr-1"></i>较上月上升1起
+        </p>
+      </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <!-- 违规类型分布 -->
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="text-sm font-bold mb-3 flex items-center">
+          <i class="fa fa-pie-chart text-primary mr-2"></i>违规类型分布
+        </h3>
+        <div id="violationTypeChart" class="w-full h-64"></div>
+      </div>
+      
+      <!-- 月度违规趋势 -->
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="text-sm font-bold mb-3 flex items-center">
+          <i class="fa fa-line-chart text-primary mr-2"></i>月度违规趋势
+        </h3>
+        <div id="monthlyTrendChart" class="w-full h-64"></div>
+      </div>
+    </div>
+    
+    <!-- 楼宇安全状况 -->
+    <div class="bg-white p-4 rounded-lg shadow-sm mb-5">
+      <h3 class="text-sm font-bold mb-3 flex items-center">
+        <i class="fa fa-building text-primary mr-2"></i>各楼宇安全状况对比
+      </h3>
+      <div id="buildingComparisonChart" class="w-full h-64"></div>
+    </div>
+    
+    <!-- 检查效果统计 -->
+    <div class="bg-white p-4 rounded-lg shadow-sm">
+      <h3 class="text-sm font-bold mb-3 flex items-center">
+        <i class="fa fa-check-circle text-primary mr-2"></i>安全检查效果统计
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 text-xs text-gray-500">
+              <th class="px-3 py-2 text-left">检查类型</th>
+              <th class="px-3 py-2 text-left">检查次数</th>
+              <th class="px-3 py-2 text-left">发现问题数</th>
+              <th class="px-3 py-2 text-left">整改完成率</th>
+              <th class="px-3 py-2 text-left">违规下降率</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+              <td class="px-3 py-2">电器安全检查</td>
+              <td class="px-3 py-2">6</td>
+              <td class="px-3 py-2">23</td>
+              <td class="px-3 py-2">95%</td>
+              <td class="px-3 py-2 text-success">18%</td>
+            </tr>
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+              <td class="px-3 py-2">消防安全检查</td>
+              <td class="px-3 py-2">4</td>
+              <td class="px-3 py-2">15</td>
+              <td class="px-3 py-2">90%</td>
+              <td class="px-3 py-2 text-success">12%</td>
+            </tr>
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+              <td class="px-3 py-2">卫生检查</td>
+              <td class="px-3 py-2">8</td>
+              <td class="px-3 py-2">32</td>
+              <td class="px-3 py-2">88%</td>
+              <td class="px-3 py-2 text-success">8%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 初始化图表
+    function initCharts() {
+      // 违规类型分布图表
+      const violationTypeChart = echarts.init(document.getElementById('violationTypeChart'));
+      violationTypeChart.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 10, top: 20, textStyle: { fontSize: 12 } },
+        series: [{
+          name: '违规类型',
+          type: 'pie',
+          radius: '70%',
+          center: ['60%', '50%'],
+          data: [
+            { value: 24, name: '违规电器' },
+            { value: 16, name: '晚归/夜不归宿' },
+            { value: 10, name: '卫生不达标' },
+            { value: 4, name: '消防违规' },
+            { value: 2, name: '其他违规' }
+          ],
+          itemStyle: {
+            colors: ['#EF4444', '#F59E0B', '#3B82F6', '#10B981', '#6B7280']
+          }
+        }]
+      });
+
+      // 月度违规趋势图表
+      const monthlyTrendChart = echarts.init(document.getElementById('monthlyTrendChart'));
+      monthlyTrendChart.setOption({
+        tooltip: { trigger: 'axis' },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'category', data: ['4月', '5月', '6月'] },
+        yAxis: { type: 'value' },
+        series: [{
+          data: [22, 16, 18],
+          type: 'line',
+          smooth: true,
+          lineStyle: { width: 3, color: '#3B82F6' },
+          itemStyle: { color: '#3B82F6' }
+        }]
+      });
+
+      // 楼宇对比图表
+      const buildingChart = echarts.init(document.getElementById('buildingComparisonChart'));
+      buildingChart.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'category', data: ['1号楼', '2号楼', '3号楼', '4号楼'] },
+        yAxis: { type: 'value', name: '违规次数' },
+        series: [{
+          name: '违规次数',
+          type: 'bar',
+          data: [12, 18, 15, 11],
+          itemStyle: { color: function(params) {
+            const colors = ['#3B82F6', '#F59E0B', '#EF4444', '#10B981'];
+            return colors[params.dataIndex];
+          }}
+        }]
+      });
+
+      // 响应窗口大小变化
+      window.addEventListener('resize', () => {
+        violationTypeChart.resize();
+        monthlyTrendChart.resize();
+        buildingChart.resize();
+      });
+      
+      return { violationTypeChart, monthlyTrendChart, buildingChart };
+    }
+
+    // 刷新图表数据
+    function refreshCharts(charts, timeRange, building) {
+      // 根据筛选条件更新图表数据
+      if (timeRange === 'month') {
+        charts.monthlyTrendChart.setOption({
+          xAxis: { data: ['6月'] },
+          series: [{ data: [18] }]
+        });
+      } else if (timeRange === 'quarter') {
+        charts.monthlyTrendChart.setOption({
+          xAxis: { data: ['4月', '5月', '6月'] },
+          series: [{ data: [22, 16, 18] }]
+        });
+      } else if (timeRange === 'halfyear') {
+        charts.monthlyTrendChart.setOption({
+          xAxis: { data: ['1月', '2月', '3月', '4月', '5月', '6月'] },
+          series: [{ data: [15, 12, 18, 22, 16, 18] }]
+        });
+      }
+      
+      // 楼宇筛选逻辑
+      if (building !== 'all') {
+        const buildingData = {
+          '1': [12, 0, 0, 0],
+          '2': [0, 18, 0, 0],
+          '3': [0, 0, 15, 0],
+          '4': [0, 0, 0, 11]
+        };
+        charts.buildingChart.setOption({
+          series: [{ data: buildingData[building] }]
+        });
+      } else {
+        charts.buildingChart.setOption({
+          series: [{ data: [12, 18, 15, 11] }]
+        });
+      }
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      const charts = initCharts();
+      
+      // 刷新按钮事件
+      document.getElementById('refreshBtn').addEventListener('click', () => {
+        const timeRange = document.getElementById('timeRange').value;
+        const building = document.getElementById('buildingFilter').value;
+        refreshCharts(charts, timeRange, building);
+        
+        // 显示刷新动画
+        const btn = document.getElementById('refreshBtn');
+        btn.classList.add('animate-spin');
+        setTimeout(() => btn.classList.remove('animate-spin'), 800);
+      });
+      
+      // 筛选条件变化时更新图表
+      document.getElementById('timeRange').addEventListener('change', () => {
+        const timeRange = document.getElementById('timeRange').value;
+        const building = document.getElementById('buildingFilter').value;
+        refreshCharts(charts, timeRange, building);
+      });
+      
+      document.getElementById('buildingFilter').addEventListener('change', () => {
+        const timeRange = document.getElementById('timeRange').value;
+        const building = document.getElementById('buildingFilter').value;
+        refreshCharts(charts, timeRange, building);
+      });
+    });
+  </script>
+</body>
+</html>
+    

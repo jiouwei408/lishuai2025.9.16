@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>退宿处理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            danger: '#EF4444'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 p-4 md:p-6">
+  <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-5">
+    <h2 class="text-lg font-bold mb-4 flex items-center">
+      <i class="fa fa-sign-out text-primary mr-2"></i>学生退宿处理
+    </h2>
+    
+    <form id="checkoutForm" class="space-y-4 text-sm">
+      <!-- 学生信息 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-600 mb-1">学号 <span class="text-danger">*</span></label>
+          <input type="text" id="studentId" class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:border-primary" required>
+          <p class="text-danger text-xs mt-1 hidden" id="studentIdError">请输入正确的学号（8-10位数字）</p>
+        </div>
+        <div>
+          <label class="block text-gray-600 mb-1">姓名 <span class="text-danger">*</span></label>
+          <input type="text" id="studentName" class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:border-primary" required>
+          <p class="text-danger text-xs mt-1 hidden" id="studentNameError">请输入姓名</p>
+        </div>
+        <div>
+          <label class="block text-gray-600 mb-1">宿舍 <span class="text-danger">*</span></label>
+          <input type="text" id="dormitory" placeholder="如:3号楼-402" class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:border-primary" required>
+          <p class="text-danger text-xs mt-1 hidden" id="dormitoryError">请输入正确的宿舍格式（如:3号楼-402）</p>
+        </div>
+        <div>
+          <label class="block text-gray-600 mb-1">退宿日期 <span class="text-danger">*</span></label>
+          <input type="date" id="checkoutDate" class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:border-primary" required>
+          <p class="text-danger text-xs mt-1 hidden" id="dateError">请选择退宿日期</p>
+        </div>
+      </div>
+      
+      <!-- 物品检查 -->
+      <div>
+        <label class="block text-gray-600 mb-2">物品检查</label>
+        <div class="space-y-2" id="itemsCheck">
+          <label class="flex items-center">
+            <input type="checkbox" name="items" value="bed" class="mr-2">
+            <span>床铺完好</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="items" value="desk" class="mr-2">
+            <span>桌椅完好</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="items" value="door" class="mr-2">
+            <span>门窗完好</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" name="items" value="water" class="mr-2">
+            <span>水电正常</span>
+          </label>
+        </div>
+        <p class="text-danger text-xs mt-1 hidden" id="itemsError">请至少检查一项物品状态</p>
+      </div>
+      
+      <!-- 其他信息 -->
+      <div>
+        <label class="block text-gray-600 mb-1">物品损坏/遗失</label>
+        <textarea rows="2" id="damageInfo" placeholder="如有物品损坏或遗失，请说明" class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:border-primary"></textarea>
+      </div>
+      
+      <div>
+        <label class="block text-gray-600 mb-1">押金处理 <span class="text-danger">*</span></label>
+        <select id="depositHandle" class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:border-primary" required>
+          <option value="">请选择处理方式</option>
+          <option>全额退还</option>
+          <option>部分扣除</option>
+          <option>全部扣除</option>
+        </select>
+        <p class="text-danger text-xs mt-1 hidden" id="depositError">请选择押金处理方式</p>
+      </div>
+      
+      <!-- 处理结果 -->
+      <div class="flex gap-3 pt-2">
+        <button type="button" class="flex-1 py-2 border border-gray-200 rounded hover:bg-gray-50">
+          暂存
+        </button>
+        <button type="submit" class="flex-1 py-2 bg-primary text-white rounded hover:bg-primary/90">
+          确认退宿
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('checkoutForm');
+    
+    // 验证函数
+    function validateForm() {
+      let isValid = true;
+      const today = new Date().toISOString().split('T')[0];
+      
+      // 学号验证（8-10位数字）
+      const studentId = document.getElementById('studentId');
+      if (!/^\d{8,10}$/.test(studentId.value.trim())) {
+        showError('studentIdError');
+        isValid = false;
+      } else {
+        hideError('studentIdError');
+      }
+      
+      // 姓名验证
+      const studentName = document.getElementById('studentName');
+      if (!studentName.value.trim()) {
+        showError('studentNameError');
+        isValid = false;
+      } else {
+        hideError('studentNameError');
+      }
+      
+      // 宿舍验证
+      const dormitory = document.getElementById('dormitory');
+      if (!/^\d+号楼-\d+$/.test(dormitory.value.trim())) {
+        showError('dormitoryError');
+        isValid = false;
+      } else {
+        hideError('dormitoryError');
+      }
+      
+      // 日期验证
+      const checkoutDate = document.getElementById('checkoutDate');
+      if (!checkoutDate.value || checkoutDate.value > today) {
+        showError('dateError');
+        isValid = false;
+      } else {
+        hideError('dateError');
+      }
+      
+      // 物品检查验证
+      const itemsChecked = document.querySelectorAll('input[name="items"]:checked').length > 0;
+      if (!itemsChecked) {
+        showError('itemsError');
+        isValid = false;
+      } else {
+        hideError('itemsError');
+      }
+      
+      // 押金处理验证
+      const depositHandle = document.getElementById('depositHandle');
+      if (!depositHandle.value) {
+        showError('depositError');
+        isValid = false;
+      } else {
+        hideError('depositError');
+      }
+      
+      return isValid;
+    }
+    
+    // 显示错误信息
+    function showError(id) {
+      document.getElementById(id).classList.remove('hidden');
+      const inputId = id.replace('Error', '');
+      if (inputId !== 'items') {
+        document.getElementById(inputId).classList.add('border-danger');
+      }
+    }
+    
+    // 隐藏错误信息
+    function hideError(id) {
+      document.getElementById(id).classList.add('hidden');
+      const inputId = id.replace('Error', '');
+      if (inputId !== 'items') {
+        document.getElementById(inputId).classList.remove('border-danger');
+      }
+    }
+    
+    // 实时验证
+    document.getElementById('studentId').addEventListener('input', function() {
+      if (/^\d{8,10}$/.test(this.value.trim())) {
+        hideError('studentIdError');
+      }
+    });
+    
+    document.getElementById('studentName').addEventListener('input', function() {
+      if (this.value.trim()) {
+        hideError('studentNameError');
+      }
+    });
+    
+    document.getElementById('dormitory').addEventListener('input', function() {
+      if (/^\d+号楼-\d+$/.test(this.value.trim())) {
+        hideError('dormitoryError');
+      }
+    });
+    
+    document.getElementById('checkoutDate').addEventListener('change', function() {
+      if (this.value && this.value <= new Date().toISOString().split('T')[0]) {
+        hideError('dateError');
+      }
+    });
+    
+    document.querySelectorAll('input[name="items"]').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        if (document.querySelectorAll('input[name="items"]:checked').length > 0) {
+          hideError('itemsError');
+        }
+      });
+    });
+    
+    document.getElementById('depositHandle').addEventListener('change', function() {
+      if (this.value) {
+        hideError('depositError');
+      }
+    });
+    
+    // 提交表单
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        alert('退宿处理已完成！');
+        this.reset();
+      }
+    });
+  </script>
+</body>
+</html>
+    

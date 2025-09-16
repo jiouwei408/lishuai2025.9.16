@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通知管理 - 教师端</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: { 
+      colors: { primary: '#3B82F6', success: '#10B981', warning: '#F59E0B', danger: '#EF4444' }
+    }}}
+  </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <!-- 页面标题 -->
+  <div class="bg-white border-b border-gray-200 py-3 px-4">
+    <h1 class="text-base font-bold text-primary flex items-center">
+      <i class="fa fa-bell mr-2"></i>通知管理
+    </h1>
+  </div>
+
+  <main class="container mx-auto px-4 py-5">
+    <!-- 功能按钮区 -->
+    <div class="mb-5 flex justify-between items-center">
+      <div class="flex items-center">
+        <button class="filter-btn active px-3 py-1.5 text-xs rounded bg-primary text-white mr-2">全部通知</button>
+      </div>
+      <button class="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90" onclick="toggleModal('createNoticeModal', true)">
+        <i class="fa fa-plus mr-1"></i>发布新通知
+      </button>
+    </div>
+
+    <!-- 通知内容 -->
+    <div class="space-y-3 mb-5">
+      <!-- 老师发布的通知 -->
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-primary hover:shadow-md transition-shadow">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium">安全检查通知</h3>
+          <div class="text-xs text-gray-500 flex items-center">
+            <span>06-28 09:30</span>
+            <span class="mx-1">|</span>
+            <span class="text-primary">已读: 128/156</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-600 mt-1">6月30日将进行月度安全大检查，请各宿舍做好准备，重点检查违规电器和消防设施</p>
+        <div class="mt-2 flex justify-end">
+          <button class="text-xs text-gray-500 mr-2" onclick="toggleModal('editNoticeModal', true)">编辑</button>
+          <button class="text-xs text-danger">删除</button>
+        </div>
+      </div>
+
+      <!-- 系统通知 -->
+      <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium">宿舍维修进度通知</h3>
+          <span class="text-xs text-gray-500">06-27 16:45</span>
+        </div>
+        <p class="text-xs text-gray-600 mt-1">3号楼402宿舍的水管维修已完成，请安排检查验收工作</p>
+      </div>
+
+      <!-- 老师发布的通知 -->
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-warning hover:shadow-md transition-shadow">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium">台风预警工作安排</h3>
+          <div class="text-xs text-gray-500 flex items-center">
+            <span>06-28 15:20</span>
+            <span class="mx-1">|</span>
+            <span class="text-primary">已读: 95/156</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-600 mt-1">据气象部门预报，未来24小时将有台风影响我市，请各楼管老师加强巡查，确保学生安全</p>
+        <div class="mt-2 flex justify-end">
+          <button class="text-xs text-gray-500 mr-2" onclick="toggleModal('editNoticeModal', true)">编辑</button>
+          <button class="text-xs text-danger">删除</button>
+        </div>
+      </div>
+
+      <!-- 新增通知 -->
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-primary hover:shadow-md transition-shadow">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium">暑期值班安排通知</h3>
+          <div class="text-xs text-gray-500 flex items-center">
+            <span>06-29 10:10</span>
+            <span class="mx-1">|</span>
+            <span class="text-primary">已读: 32/45</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-600 mt-1">暑期值班表已发布，请各位老师查看并确认，如有调整请于7月5日前反馈</p>
+        <div class="mt-2 flex justify-end">
+          <button class="text-xs text-gray-500 mr-2" onclick="toggleModal('editNoticeModal', true)">编辑</button>
+          <button class="text-xs text-danger">删除</button>
+        </div>
+      </div>
+
+      <!-- 新增通知 -->
+      <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium">宿舍卫生评比结果</h3>
+          <span class="text-xs text-gray-500">06-26 14:30</span>
+        </div>
+        <p class="text-xs text-gray-600 mt-1">6月份宿舍卫生评比结果已公示，优秀宿舍将获得表彰，请通知相关学生查看</p>
+      </div>
+    </div>
+
+    <!-- 加载更多 -->
+    <button class="w-full py-2 text-sm text-primary border border-primary rounded hover:bg-primary/5 transition-colors">
+      加载更多通知
+    </button>
+  </main>
+
+  <!-- 发布通知弹窗 -->
+  <div id="createNoticeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">发布新通知</h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('createNoticeModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知标题</label>
+          <input type="text" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" placeholder="输入通知标题">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知类型</label>
+          <select class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+            <option>普通通知</option>
+            <option>重要通知</option>
+            <option>紧急通知</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知范围</label>
+          <select class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+            <option>全体学生</option>
+            <option>特定楼宇</option>
+            <option>特定年级</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知内容</label>
+          <textarea class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" rows="4" placeholder="输入通知内容"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('createNoticeModal', false)">取消</button>
+        <button class="flex-1 bg-primary text-white py-1.5 text-sm rounded hover:bg-primary/90">发布通知</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑通知弹窗 -->
+  <div id="editNoticeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">编辑通知</h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('editNoticeModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知标题</label>
+          <input type="text" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" value="安全检查通知">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知类型</label>
+          <select class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+            <option>普通通知</option>
+            <option selected>重要通知</option>
+            <option>紧急通知</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">通知内容</label>
+          <textarea class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" rows="4">6月30日将进行月度安全大检查，请各宿舍做好准备，重点检查违规电器和消防设施</textarea>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('editNoticeModal', false)">取消</button>
+        <button class="flex-1 bg-primary text-white py-1.5 text-sm rounded hover:bg-primary/90">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 筛选按钮切换
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('active', 'bg-primary', 'text-white');
+          b.classList.add('bg-gray-100', 'text-gray-600');
+        });
+        btn.classList.add('active', 'bg-primary', 'text-white');
+        btn.classList.remove('bg-gray-100', 'text-gray-600');
+      });
+    });
+
+    // 弹窗控制
+    function toggleModal(modalId, show) {
+      const modal = document.getElementById(modalId);
+      modal.classList.toggle('hidden', !show);
+    }
+
+    // 点击弹窗背景关闭
+    document.querySelectorAll('.fixed').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) toggleModal(modal.id, false);
+      });
+    });
+  </script>
+</body>
+</html>
+    

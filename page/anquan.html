@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安全检查 - 宿舍安全管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: { 
+      colors: { primary: '#3B82F6', success: '#10B981', warning: '#F59E0B', danger: '#EF4444' }
+    }}}
+  </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <main class="container mx-auto px-4 py-5">
+    <!-- 安全检查模块 -->
+    <div id="safety-check">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold flex items-center">
+          <i class="fa fa-check-square-o text-primary mr-2"></i>安全检查计划
+        </h2>
+        <button class="text-sm bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90" onclick="toggleModal('createCheckPlanModal', true)">
+          <i class="fa fa-plus mr-1"></i>创建检查计划
+        </button>
+      </div>
+
+      <!-- 检查计划列表 -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-5">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 text-xs text-gray-500">
+                <th class="px-4 py-3 text-left">计划名称</th>
+                <th class="px-4 py-3 text-left">检查范围</th>
+                <th class="px-4 py-3 text-left">检查时间</th>
+                <th class="px-4 py-3 text-left">负责人</th>
+                <th class="px-4 py-3 text-left">状态</th>
+                <th class="px-4 py-3 text-left">完成率</th>
+                <th class="px-4 py-3 text-left">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3">月度安全大检查</td>
+                <td class="px-4 py-3">全部楼宇</td>
+                <td class="px-4 py-3">2023-06-30</td>
+                <td class="px-4 py-3">李老师、王老师</td>
+                <td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800">未开始</span></td>
+                <td class="px-4 py-3">0%</td>
+                <td class="px-4 py-3">
+                  <button class="text-primary text-xs hover:text-primary/80" onclick="showPlanDetail('月度安全大检查')">查看详情</button>
+                  <button class="text-warning text-xs hover:text-warning/80 ml-2" onclick="showEditPlanModal('月度安全大检查')">编辑</button>
+                </td>
+              </tr>
+              <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3">消防安全专项检查</td>
+                <td class="px-4 py-3">1-3号楼</td>
+                <td class="px-4 py-3">2023-06-15</td>
+                <td class="px-4 py-3">张老师</td>
+                <td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-800">已完成</span></td>
+                <td class="px-4 py-3">100%</td>
+                <td class="px-4 py-3">
+                  <button class="text-primary text-xs hover:text-primary/80" onclick="showCheckReport('消防安全专项检查')">查看报告</button>
+                </td>
+              </tr>
+              <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3">电器安全抽查</td>
+                <td class="px-4 py-3">4-6号楼</td>
+                <td class="px-4 py-3">2023-06-25</td>
+                <td class="px-4 py-3">刘老师</td>
+                <td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800">进行中</span></td>
+                <td class="px-4 py-3">65%</td>
+                <td class="px-4 py-3">
+                  <button class="text-primary text-xs hover:text-primary/80" onclick="showPlanDetail('电器安全抽查')">查看详情</button>
+                  <button class="text-success text-xs hover:text-success/80 ml-2" onclick="showResultEntryModal('电器安全抽查')">录入结果</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 最近检查结果 -->
+      <div class="bg-white rounded-lg shadow-sm p-4">
+        <h2 class="text-base font-bold mb-4 flex items-center">
+          <i class="fa fa-list-alt text-primary mr-2"></i>最近检查结果
+        </h2>
+        <div class="space-y-4">
+          <div class="border-l-4 border-danger pl-3 py-1">
+            <h3 class="font-medium text-sm">3号楼-402</h3>
+            <p class="text-xs text-gray-600 mt-1">发现违规电器：电热水壶1个，已暂扣</p>
+            <p class="text-xs text-gray-500 mt-1">检查人：李老师 | 时间：2023-06-20 22:30</p>
+          </div>
+          <div class="border-l-4 border-warning pl-3 py-1">
+            <h3 class="font-medium text-sm">2号楼-501</h3>
+            <p class="text-xs text-gray-600 mt-1">卫生状况不达标，存在安全隐患，已通知整改</p>
+            <p class="text-xs text-gray-500 mt-1">检查人：王老师 | 时间：2023-06-18 14:20</p>
+          </div>
+          <div class="border-l-4 border-success pl-3 py-1">
+            <h3 class="font-medium text-sm">1号楼-306</h3>
+            <p class="text-xs text-gray-600 mt-1">安全状况良好，无违规情况</p>
+            <p class="text-xs text-gray-500 mt-1">检查人：张老师 | 时间：2023-06-15 10:15</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 创建检查计划弹窗 -->
+  <div id="createCheckPlanModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">创建检查计划</h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('createCheckPlanModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div><label class="block text-xs text-gray-700 mb-1">计划名称</label>
+        <input type="text" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" placeholder="例如：月度安全大检查"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查范围</label>
+        <select class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+          <option>全部楼宇</option><option>1-3号楼</option><option>4-6号楼</option><option>指定楼宇</option>
+        </select></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查时间</label>
+        <input type="date" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">负责人</label>
+        <input type="text" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" placeholder="多个用逗号分隔"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查内容</label>
+        <textarea class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" rows="3" placeholder="请输入检查重点内容..."></textarea></div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('createCheckPlanModal', false)">取消</button>
+        <button class="flex-1 bg-primary text-white py-1.5 text-sm rounded hover:bg-primary/90">创建计划</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 计划详情弹窗 -->
+  <div id="planDetailModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">检查计划详情 - <span id="detailPlanName">月度安全大检查</span></h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('planDetailModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="border-b border-gray-100 pb-4 mb-4">
+        <h4 class="text-xs font-medium text-gray-500 mb-3">基本信息</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div><p class="text-gray-500 text-xs">计划名称</p><p id="detailPlanTitle">月度安全大检查</p></div>
+          <div><p class="text-gray-500 text-xs">检查范围</p><p id="detailCheckScope">全部楼宇</p></div>
+          <div><p class="text-gray-500 text-xs">检查时间</p><p id="detailCheckTime">2023-06-30</p></div>
+          <div><p class="text-gray-500 text-xs">负责人</p><p id="detailResponsible">李老师、王老师</p></div>
+          <div><p class="text-gray-500 text-xs">当前状态</p><p id="detailStatus"><span class="px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800">未开始</span></p></div>
+          <div><p class="text-gray-500 text-xs">完成率</p><p id="detailCompletion">0%</p></div>
+        </div>
+      </div>
+      <div class="border-b border-gray-100 pb-4 mb-4">
+        <h4 class="text-xs font-medium text-gray-500 mb-3">检查内容</h4>
+        <p class="text-sm p-2 bg-gray-50 rounded border border-gray-100" id="detailContent">
+          1. 电器使用安全检查：是否存在违规电器、电线是否乱拉乱接<br>
+          2. 消防安全检查：消防器材是否完好、消防通道是否畅通<br>
+          3. 卫生状况检查：宿舍内外卫生是否达标<br>
+          4. 公共设施检查：楼道、电梯等公共区域设施是否完好
+        </p>
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button class="text-sm border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50" onclick="toggleModal('planDetailModal', false)">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑计划弹窗 -->
+  <div id="editPlanModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">编辑检查计划 - <span id="editPlanName">月度安全大检查</span></h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('editPlanModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div><label class="block text-xs text-gray-700 mb-1">计划名称</label>
+        <input type="text" id="editPlanTitle" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" value="月度安全大检查"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查范围</label>
+        <select id="editCheckScope" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+          <option>全部楼宇</option><option>1-3号楼</option><option>4-6号楼</option><option>指定楼宇</option>
+        </select></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查时间</label>
+        <input type="date" id="editCheckTime" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" value="2023-06-30"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">负责人</label>
+        <input type="text" id="editResponsible" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" value="李老师、王老师"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查内容</label>
+        <textarea id="editContent" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" rows="3">
+1. 电器使用安全检查：是否存在违规电器、电线是否乱拉乱接
+2. 消防安全检查：消防器材是否完好、消防通道是否畅通
+3. 卫生状况检查：宿舍内外卫生是否达标
+4. 公共设施检查：楼道、电梯等公共区域设施是否完好</textarea></div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('editPlanModal', false)">取消</button>
+        <button class="flex-1 bg-warning text-white py-1.5 text-sm rounded hover:bg-warning/90">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 录入结果弹窗 -->
+  <div id="resultEntryModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-2xl w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">录入检查结果 - <span id="entryPlanName">电器安全抽查</span></h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('resultEntryModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div><label class="block text-xs text-gray-700 mb-1">检查楼宇</label>
+        <select id="entryBuilding" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+          <option>4号楼</option><option>5号楼</option><option>6号楼</option>
+        </select></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查时间</label>
+        <input type="datetime-local" id="entryCheckTime" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查人</label>
+        <input type="text" id="entryChecker" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" value="刘老师"></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">检查结果</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center text-sm"><input type="radio" name="checkResult" value="normal" class="mr-2"> 未发现问题</label>
+          <label class="flex items-center text-sm"><input type="radio" name="checkResult" value="problem" class="mr-2" checked> 发现问题</label>
+        </div></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">问题详情</label>
+        <textarea id="entryProblemDesc" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" rows="3">5号楼302宿舍发现违规使用电暖器，存在安全隐患。5号楼401宿舍电线乱拉，插座超负荷使用。</textarea></div>
+        
+        <div><label class="block text-xs text-gray-700 mb-1">处理措施</label>
+        <textarea id="entryAction" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5" rows="2">已暂扣电暖器，对相关学生进行批评教育，责令整改。</textarea></div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('resultEntryModal', false)">取消</button>
+        <button class="flex-1 bg-success text-white py-1.5 text-sm rounded hover:bg-success/90">保存结果</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查看检查报告弹窗 -->
+  <div id="checkReportModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-2xl w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base">检查报告 - <span id="reportPlanName">消防安全专项检查</span></h3>
+        <button class="text-gray-400 hover:text-gray-600" onclick="toggleModal('checkReportModal', false)">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="border-b border-gray-100 pb-4 mb-4">
+        <h4 class="text-xs font-medium text-gray-500 mb-3">检查概况</h4>
+        <div class="grid grid-cols-3 gap-3 text-sm">
+          <div class="p-2 bg-gray-50 rounded border border-gray-100"><p class="text-gray-500 text-xs">检查范围</p><p>1-3号楼</p></div>
+          <div class="p-2 bg-gray-50 rounded border border-gray-100"><p class="text-gray-500 text-xs">检查时间</p><p>2023-06-15</p></div>
+          <div class="p-2 bg-gray-50 rounded border border-gray-100"><p class="text-gray-500 text-xs">检查人</p><p>张老师</p></div>
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="window.print()" class="text-sm bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200 mr-2">
+          <i class="fa fa-print mr-1"></i>打印报告
+        </button>
+        <button class="text-sm border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50" onclick="toggleModal('checkReportModal', false)">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 通用弹窗控制函数
+    function toggleModal(modalId, show) {
+      const modal = document.getElementById(modalId);
+      modal.classList.toggle('hidden', !show);
+    }
+    
+    // 显示计划详情
+    function showPlanDetail(planName) {
+      document.getElementById('detailPlanName').textContent = planName;
+      document.getElementById('detailPlanTitle').textContent = planName;
+      
+      // 根据计划名称设置不同内容
+      if (planName === '电器安全抽查') {
+        document.getElementById('detailCheckScope').textContent = '4-6号楼';
+        document.getElementById('detailCheckTime').textContent = '2023-06-25';
+        document.getElementById('detailResponsible').textContent = '刘老师';
+        document.getElementById('detailStatus').innerHTML = '<span class="px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800">进行中</span>';
+        document.getElementById('detailCompletion').textContent = '65%';
+      } else {
+        document.getElementById('detailCheckScope').textContent = '全部楼宇';
+        document.getElementById('detailCheckTime').textContent = '2023-06-30';
+        document.getElementById('detailResponsible').textContent = '李老师、王老师';
+        document.getElementById('detailStatus').innerHTML = '<span class="px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800">未开始</span>';
+        document.getElementById('detailCompletion').textContent = '0%';
+      }
+      toggleModal('planDetailModal', true);
+    }
+    
+    // 显示编辑计划弹窗
+    function showEditPlanModal(planName) {
+      document.getElementById('editPlanName').textContent = planName;
+      document.getElementById('editPlanTitle').value = planName;
+      toggleModal('editPlanModal', true);
+    }
+    
+    // 显示结果录入弹窗
+    function showResultEntryModal(planName) {
+      document.getElementById('entryPlanName').textContent = planName;
+      toggleModal('resultEntryModal', true);
+    }
+    
+    // 显示检查报告
+    function showCheckReport(planName) {
+      document.getElementById('reportPlanName').textContent = planName;
+      toggleModal('checkReportModal', true);
+    }
+    
+    // 点击弹窗背景关闭
+    document.querySelectorAll('.fixed').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) toggleModal(modal.id, false);
+      });
+    });
+  </script>
+</body>
+</html>
+    

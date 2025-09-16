@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../css/public.css" media="all">
+	<style>
+		.layui-form-label.required::after {
+		    content: '*';
+		    color: #FF4D4F;
+		    margin-right: 4px;
+		}
+	</style>
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+            <legend>宿舍分配管理</legend>
+        </fieldset>
+
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label required">宿管姓名</label>
+                <div class="layui-input-block">
+                    <!-- 新增：lay-verify="required"（原已含lay-reqtext，保留） -->
+                    <input type="text" name="username" lay-verify="required" lay-reqtext="姓名是必填项，岂能为空？" placeholder="请输入宿管姓名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+			
+			<div class="layui-form-item">
+			    <label class="layui-form-label required">宿管工号</label>
+			    <div class="layui-input-block">
+			        <!-- 新增：lay-verify="required"（原已含lay-reqtext，保留） -->
+			        <input type="text" name="username" lay-verify="required" lay-reqtext="工号是必填项" placeholder="请输入宿管工号" autocomplete="off" class="layui-input">
+			    </div>
+			</div>
+			
+			
+			<div class="layui-form-item">
+			    <label class="layui-form-label required">性别</label>
+			    <div class="layui-input-block">
+			        <!-- 保留原radio，新增隐藏字段用于校验 -->
+			        <input type="radio" name="sex" value="男" title="男" checked="">
+			        <input type="radio" name="sex" value="女" title="女">
+			        <input type="hidden" name="sexCheck" lay-verify="required" lay-reqtext="请选择性别！">
+			    </div>
+			</div>
+			  
+			  <div class="layui-form-item">
+			      <label class="layui-form-label required">宿管电话</label>
+			      <div class="layui-input-block">
+			          <!-- 新增：lay-verify="required"（原已含lay-reqtext，保留） -->
+			          <input type="text" name="username" lay-verify="required" lay-reqtext="工号是必填项" placeholder="请输入宿管电话" autocomplete="off" class="layui-input">
+			      </div>
+			  </div>
+			
+			<div class="layui-form-item">
+			    <!-- 修复：删除多余selected属性 -->
+			    <label class="layui-form-label required">管理楼号楼</label>
+			    <div class="layui-input-block">
+			        <!-- 新增：lay-verify="required" + lay-reqtext + 改name为interest3 + 修复option未闭合 -->
+			        <select name="interest3" lay-filter="aihao" lay-verify="required" lay-reqtext="请选择管理楼号楼！">
+			            <option value="">请选择管理楼号</option>
+			            <option value="0">1号楼</option>
+			            <option value="1">2号楼</option>
+			            <option value="2">3号楼</option>
+			            <option value="3">4号楼</option>
+			            <option value="4">5号楼</option>					  
+			        </select>
+			    </div>
+			</div>
+			
+		
+            <!-- 备注：完全保留原代码，无任何修改（不校验） -->
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入内容" class="layui-textarea"></textarea>
+                </div>
+            </div>
+			
+            <!-- 按钮：完全保留原代码 -->
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+</div>
+
+<!-- 脚本：保留原所有引入和冗余组件，仅新增校验逻辑 -->
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+
+        // 保留原日期渲染（未使用，不删除）
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        // 保留原编辑器（未使用，不删除）
+        var editIndex = layedit.build('LAY_demo_editor');
+
+        // 保留原自定义验证规则，新增性别校验
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少得5个字符啊';
+                }
+            }
+            , pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            }
+            // 新增：性别校验（通过隐藏字段触发）
+            , sexCheck: function (value) {
+                var sex = document.querySelector('input[name="sex"]:checked')?.value;
+                if (!sex) {
+                    return '请选择性别！';
+                }
+            }
+        });
+
+        // 保留原开关监听（未使用，不删除）
+        form.on('switch(switchTest)', function (data) {
+            layer.msg('开关checked：' + (this.checked ? 'true' : 'false'), {
+                offset: '6px'
+            });
+            layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+        });
+
+        // 保留原提交监听，新增隐藏字段删除逻辑（避免传多余数据）
+        form.on('submit(demo1)', function (data) {
+            // 移除隐藏的性别校验字段
+            delete data.field.sexCheck;
+            layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            })
+            return false;
+        });
+
+        // 保留原表单初始赋值（不修改）
+        form.val('example', {
+            "username": "贤心" 
+            , "password": "123456"
+            , "interest": 1
+            , "like[write]": true 
+            , "close": true 
+            , "sex": "女"
+            , "desc": "我爱 layui"
+        })
+
+        // 新增：初始化性别隐藏字段值（确保默认选中时校验通过）
+        document.querySelector('input[name="sexCheck"]').value = '男';
+        // 新增：监听性别切换，同步隐藏字段值
+        document.querySelectorAll('input[name="sex"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelector('input[name="sexCheck"]').value = this.value;
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

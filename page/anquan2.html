@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宿舍安全管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { primary: '#3B82F6', success: '#10B981', warning: '#F59E0B', danger: '#EF4444' }}}}</script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- 导航 -->
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4">
+      <button class="py-3 px-4 text-sm font-medium text-primary border-b-2 border-primary">
+        <i class="fa fa-exclamation-triangle mr-1"></i>违规记录
+      </button>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-5">
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-danger">
+        <p class="text-xs text-gray-500">本月违规总数</p>
+        <h3 class="text-lg font-bold" id="totalViolation">18</h3>
+      </div>
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-warning">
+        <p class="text-xs text-gray-500">待处理违规</p>
+        <h3 class="text-lg font-bold" id="pendingViolation">5</h3>
+      </div>
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-success">
+        <p class="text-xs text-gray-500">已处理违规</p>
+        <h3 class="text-lg font-bold" id="handledViolation">13</h3>
+      </div>
+      <div class="bg-white p-3 rounded-lg shadow-sm border-l-2 border-primary">
+        <p class="text-xs text-gray-500">严重违规</p>
+        <h3 class="text-lg font-bold" id="seriousViolation">3</h3>
+      </div>
+    </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:flex-initial">
+            <input type="text" placeholder="搜索宿舍号或内容" class="text-sm border border-gray-200 rounded pl-8 pr-2 py-1.5 w-full md:w-48">
+            <i class="fa fa-search absolute left-2.5 top-2 text-gray-400 text-xs"></i>
+          </div>
+          <button class="bg-primary text-white text-sm px-3 py-1.5 rounded hover:bg-primary/90" onclick="toggleModal('addViolationModal', true)">
+            <i class="fa fa-plus mr-1"></i>添加违规
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 违规列表 -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead><tr class="bg-gray-50 text-xs text-gray-500">
+            <th class="px-4 py-3 text-left  align-middle">序号</th><th>宿舍</th><th>违规类型</th><th>内容</th><th>时间</th><th>状态</th><th>操作</th>
+          </tr></thead>
+          <tbody id="violationTableBody">
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+              <td class="px-4 py-3">1</td><td>3号楼-402</td><td>电器违规</td><td>使用违规电热水壶</td><td>2023-06-20</td>
+              <td><span class="px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-800">已处理</span></td>
+              <td><button class="text-primary text-xs" onclick="showDetail(1)">查看</button></td>
+            </tr>
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+              <td class="px-4 py-3">2</td><td>2号楼-501</td><td>卫生不达标</td><td>宿舍卫生状况差</td><td>2023-06-18</td>
+              <td><span class="px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800">处理中</span></td>
+              <td><button class="text-primary text-xs" onclick="showDetail(2)">查看</button>
+                  <button class="text-success text-xs ml-2" onclick="showHandleModal(2)">处理</button></td>
+            </tr>
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+              <td class="px-4 py-3">3</td><td>1号楼-203</td><td>消防违规</td><td>堵塞消防通道</td><td>2023-06-15</td>
+              <td><span class="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-800">待处理</span></td>
+              <td><button class="text-primary text-xs" onclick="showDetail(3)">查看</button>
+                  <button class="text-success text-xs ml-2" onclick="showHandleModal(3)">处理</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- 详情弹窗 -->
+  <div id="detailModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold">违规详情</h3>
+        <button class="text-gray-400" onclick="toggleModal('detailModal', false)"><i class="fa fa-times"></i></button>
+      </div>
+      <div class="space-y-3 text-sm">
+        <div><p class="text-gray-500 text-xs">宿舍</p><p id="detailDorm">3号楼-402</p></div>
+        <div><p class="text-gray-500 text-xs">违规类型</p><p id="detailType">电器违规</p></div>
+        <div><p class="text-gray-500 text-xs">违规内容</p><p id="detailContent">使用违规电热水壶</p></div>
+        <div><p class="text-gray-500 text-xs">发现时间</p><p id="detailTime">2023-06-20 22:30</p></div>
+        <div><p class="text-gray-500 text-xs">处理状态</p><p id="detailStatus"><span class="px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-800">已处理</span></p></div>
+        <div><p class="text-gray-500 text-xs">处理结果</p><p id="detailResult">已暂扣电热水壶，给予警告处分</p></div>
+      </div>
+      <div class="mt-4">
+        <button class="w-full text-sm border border-gray-200 py-1.5 rounded hover:bg-gray-50" onclick="toggleModal('detailModal', false)">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 处理弹窗 -->
+  <div id="handleModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold">处理违规</h3>
+        <button class="text-gray-400" onclick="toggleModal('handleModal', false)"><i class="fa fa-times"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">处理措施</label>
+          <textarea id="handleMeasure" rows="3" placeholder="请输入处理措施..." class="w-full text-sm border border-gray-200 rounded px-2 py-1.5"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">处理结果</label>
+          <select id="handleResult" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
+            <option>警告</option><option>通报批评</option><option>记过</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('handleModal', false)">取消</button>
+        <button class="flex-1 bg-success text-white py-1.5 text-sm rounded hover:bg-success/90" onclick="confirmHandle()">确认处理</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加弹窗 -->
+  <div id="addViolationModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-lg p-5 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold">添加违规记录</h3>
+        <button class="text-gray-400" onclick="toggleModal('addViolationModal', false)"><i class="fa fa-times"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">宿舍号 <span class="text-danger">*</span></label>
+          <div class="flex gap-2">
+            <select id="addDormBuilding" class="text-sm border border-gray-200 rounded px-2 py-1.5 flex-1 focus:border-primary focus:outline-none">
+              <option value="">选择楼宇</option><option>1号楼</option><option>2号楼</option><option>3号楼</option><option>4号楼</option><option>5号楼</option>
+            </select>
+            <input type="text" id="addDormNumber" placeholder="房间号" class="text-sm border border-gray-200 rounded px-2 py-1.5 flex-1 focus:border-primary focus:outline-none">
+          </div>
+          <p class="text-danger text-xs mt-1 hidden" id="dormError">请选择楼宇并填写正确房间号</p>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">违规类型 <span class="text-danger">*</span></label>
+          <select id="addViolationType" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary focus:outline-none">
+            <option value="">选择类型</option><option>电器违规</option><option>消防违规</option><option>卫生不达标</option><option>作息违规</option><option>其他违规</option>
+          </select>
+          <p class="text-danger text-xs mt-1 hidden" id="typeError">请选择违规类型</p>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">违规详情 <span class="text-danger">*</span></label>
+          <textarea id="addViolationContent" rows="3" placeholder="请描述违规情况" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary focus:outline-none"></textarea>
+          <p class="text-danger text-xs mt-1 hidden" id="contentError">请填写详情（至少5字）</p>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">发现时间 <span class="text-danger">*</span></label>
+          <input type="datetime-local" id="addViolationTime" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary focus:outline-none">
+          <p class="text-danger text-xs mt-1 hidden" id="timeError">请选择时间</p>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-700 mb-1">严重程度</label>
+          <select id="addViolationSeverity" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5 focus:border-primary focus:outline-none">
+            <option>一般</option><option>较严重</option><option>严重</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button class="flex-1 border border-gray-200 py-1.5 text-sm rounded hover:bg-gray-50" onclick="toggleModal('addViolationModal', false)">取消</button>
+        <button class="flex-1 bg-primary text-white py-1.5 text-sm rounded hover:bg-primary/90" onclick="submitNew()">确认添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示框 -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-success text-white px-4 py-2 rounded shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <span id="toastMsg">操作成功</span>
+  </div>
+
+  <script>
+    let currentId = null;
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('addViolationTime').value = new Date().toISOString().slice(0, 16);
+      // 绑定实时验证事件
+      ['addDormBuilding', 'addDormNumber', 'addViolationType', 'addViolationContent', 'addViolationTime'].forEach(id => {
+        document.getElementById(id).addEventListener(id.includes('addDorm') ? 'input' : 'change', function() {
+          const errId = id.replace('add', '').replace('DormBuilding', 'Dorm').replace('DormNumber', 'Dorm').replace('Violation', '') + 'Error';
+          if ((id === 'addDormBuilding' && this.value && document.getElementById('addDormNumber').value.trim()) ||
+              (id === 'addDormNumber' && this.value.trim() && document.getElementById('addDormBuilding').value && /^\d{1,4}$/.test(this.value)) ||
+              (id === 'addViolationType' && this.value) ||
+              (id === 'addViolationContent' && this.value.trim().length >= 5) ||
+              (id === 'addViolationTime' && this.value)) {
+            this.classList.remove('border-danger');
+            if (errId !== 'DormError' || (id === 'addDormNumber' && document.getElementById('addDormBuilding').value))
+              document.getElementById(errId).classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // 弹窗控制
+    function toggleModal(modalId, show) {
+      const modal = document.getElementById(modalId);
+      if (show) {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.querySelector('.bg-white').classList.add('scale-100'), 10);
+      } else {
+        modal.querySelector('.bg-white').classList.remove('scale-100');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+        if (modalId === 'addViolationModal') {
+          document.getElementById('addViolationForm')?.reset();
+          hideErrors();
+        }
+      }
+    }
+
+    // 显示详情
+    function showDetail(id) {
+      currentId = id;
+      const data = {
+        1: {dorm: "3号楼-402", type: "电器违规", content: "使用违规电热水壶", time: "2023-06-20 22:30", status: "已处理", result: "已暂扣电热水壶，给予警告处分"},
+        2: {dorm: "2号楼-501", type: "卫生不达标", content: "宿舍卫生状况差", time: "2023-06-18 14:20", status: "处理中", result: "已通知整改"},
+        3: {dorm: "1号楼-203", type: "消防违规", content: "堵塞消防通道", time: "2023-06-15 09:10", status: "待处理", result: ""}
+      };
+      const item = data[id];
+      Object.keys(item).forEach(key => {
+        const el = document.getElementById('detail' + key.charAt(0).toUpperCase() + key.slice(1));
+        if (el) el[key === 'status' ? 'innerHTML' : 'textContent'] = 
+          key === 'status' ? `<span class="px-1.5 py-0.5 rounded text-xs ${item[key]==='已处理'?'bg-green-100 text-green-800':item[key]==='处理中'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800'}">${item[key]}</span>` : item[key];
+      });
+      toggleModal('detailModal', true);
+    }
+
+    // 处理弹窗
+    function showHandleModal(id) {
+      currentId = id;
+      document.getElementById('handleMeasure').value = '';
+      toggleModal('handleModal', true);
+    }
+
+    // 确认处理
+    function confirmHandle() {
+      const measure = document.getElementById('handleMeasure').value.trim();
+      if (!measure) { alert('请输入处理措施'); return; }
+      
+      toggleModal('handleModal', false);
+      document.getElementById('pendingViolation').textContent = parseInt(document.getElementById('pendingViolation').textContent) - 1;
+      document.getElementById('handledViolation').textContent = parseInt(document.getElementById('handledViolation').textContent) + 1;
+      updateStatus(currentId, '已处理');
+      showToast('处理成功');
+    }
+
+    // 提交新违规
+    function submitNew() {
+      const b = document.getElementById('addDormBuilding').value,
+            r = document.getElementById('addDormNumber').value.trim(),
+            t = document.getElementById('addViolationType').value,
+            c = document.getElementById('addViolationContent').value.trim(),
+            d = document.getElementById('addViolationTime').value,
+            s = document.getElementById('addViolationSeverity').value;
+      
+      let valid = true;
+      hideErrors();
+      
+      if (!b || !r || !/^\d{1,4}$/.test(r)) { showError('dormError'); valid = false; }
+      if (!t) { showError('typeError'); valid = false; }
+      if (!c || c.length < 5) { showError('contentError'); valid = false; }
+      if (!d) { showError('timeError'); valid = false; }
+      
+      if (!valid) return;
+      
+      const dorm = `${b}-${r}`,
+            timeStr = new Date(d).toLocaleString('zh-CN', {year:'numeric', month:'2-digit', day:'2-digit'}),
+            table = document.getElementById('violationTableBody'),
+            rowCount = table.rows.length,
+            newRow = table.insertRow(0);
+      
+      newRow.className = 'border-t border-gray-100 hover:bg-gray-50';
+      newRow.innerHTML = `
+        <td class="px-4 py-3">${rowCount + 1}</td>
+        <td class="px-4 py-3">${dorm}</td>
+        <td class="px-4 py-3">${t}</td>
+        <td class="px-4 py-3">${c}</td>
+        <td class="px-4 py-3">${timeStr}</td>
+        <td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-800">待处理</span></td>
+        <td class="px-4 py-3">
+          <button class="text-primary text-xs" onclick="showDetail(${rowCount + 1})">查看</button>
+          <button class="text-success text-xs ml-2" onclick="showHandleModal(${rowCount + 1})">处理</button>
+        </td>
+      `;
+      
+      // 更新序号
+      for (let i = 1; i < table.rows.length; i++) table.rows[i].cells[0].textContent = i + 1;
+      
+      // 更新统计
+      document.getElementById('totalViolation').textContent = parseInt(document.getElementById('totalViolation').textContent) + 1;
+      document.getElementById('pendingViolation').textContent = parseInt(document.getElementById('pendingViolation').textContent) + 1;
+      if (s === '严重') document.getElementById('seriousViolation').textContent = parseInt(document.getElementById('seriousViolation').textContent) + 1;
+      
+      toggleModal('addViolationModal', false);
+      showToast('添加成功');
+    }
+
+    // 更新状态
+    function updateStatus(id, status) {
+      const row = document.getElementById('violationTableBody').rows[id - 1];
+      if (!row) return;
+      
+      const statusCls = status === '已处理' ? 'bg-green-100 text-green-800' : 
+                        status === '处理中' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800';
+      
+      row.cells[5].innerHTML = `<span class="px-1.5 py-0.5 rounded text-xs ${statusCls}">${status}</span>`;
+      row.cells[6].innerHTML = status === '已处理' ? 
+        `<button class="text-primary text-xs" onclick="showDetail(${id})">查看</button>` : 
+        `<button class="text-primary text-xs" onclick="showDetail(${id})">查看</button>
+         <button class="text-success text-xs ml-2" onclick="showHandleModal(${id})">处理</button>`;
+    }
+
+    // 错误处理
+    function hideErrors() {
+      document.querySelectorAll('[id$="Error"]').forEach(el => el.classList.add('hidden'));
+      ['addDormBuilding', 'addDormNumber', 'addViolationType', 'addViolationContent', 'addViolationTime'].forEach(id => {
+        document.getElementById(id).classList.remove('border-danger');
+      });
+    }
+
+    function showError(errorId) {
+      document.getElementById(errorId).classList.remove('hidden');
+      if (errorId === 'dormError') {
+        document.getElementById('addDormBuilding').classList.add('border-danger');
+        document.getElementById('addDormNumber').classList.add('border-danger');
+      } else {
+        document.getElementById('add' + errorId.replace('Error', '')).classList.add('border-danger');
+      }
+    }
+
+    // 提示消息
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+    }
+  </script>
+</body>
+</html>
